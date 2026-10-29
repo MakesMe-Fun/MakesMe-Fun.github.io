@@ -1,0 +1,20 @@
+---
+import type { Lang } from '../data/site';
+import { t, path, formatDate } from '../i18n';
+import { slugOf, type Post } from '../lib';
+interface Props { posts: Post[]; lang: Lang }
+const { posts, lang } = Astro.props;
+---
+{posts.length === 0 ? <p class="lead">{t(lang).noPosts}</p> : (
+  <ul class="post-list">
+    {posts.map((p) => (
+      <li>
+        <a href={path(lang, `/blog/${slugOf(p)}/`)}>
+          <span class="t">{p.data.title}</span>
+          <time datetime={p.data.date.toISOString()}>{formatDate(p.data.date, lang)}</time>
+          <span class="d">{p.data.description}</span>
+        </a>
+      </li>
+    ))}
+  </ul>
+)}

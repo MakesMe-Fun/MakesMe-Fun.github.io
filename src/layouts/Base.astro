@@ -1,0 +1,77 @@
+---
+import '../styles/global.css';
+import { site, type Lang } from '../data/site';
+import { t, path, swapLang } from '../i18n';
+
+interface Props { lang: Lang; title?: string; description?: string; active?: string; altPath?: string }
+const { lang, title, description, active, altPath } = Astro.props;
+const u = t(lang);
+const name = site.name[lang];
+const fullTitle = title ? `${title} | ${name}` : `${name} — ${site.tagline[lang]}`;
+const desc = description ?? site.tagline[lang];
+const otherLang: Lang = lang === 'ko' ? 'en' : 'ko';
+const toOther = altPath ?? swapLang(Astro.url.pathname, lang);
+const canonical = new URL(Astro.url.pathname, Astro.site);
+const nav = [
+  { key: 'home', href: path(lang, '/') },
+  { key: 'blog', href: path(lang, '/blog/') },
+  { key: 'projects', href: path(lang, '/projects/') },
+  { key: 'resume', href: path(lang, '/resume/') },
+] as const;
+---
+<!doctype html>
+<html lang={lang}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={desc} />
+    <link rel="canonical" href={canonical} />
+    <link rel="alternate" hreflang={otherLang} href={new URL(toOther, Astro.site)} />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={desc} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <!-- 네이버 서치어드바이저 인증 코드를 받으면 아래 주석을 풀고 content 값을 넣으세요 -->
+    <!-- <meta name="naver-site-verification" content="여기에_코드" /> -->
+    <script is:inline>
+      try {
+        const s = localStorage.getItem('theme');
+        const dark = s ? s === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+        document.documentElement.dataset.theme = dark ? 'dark' : 'light';
+      } catch (e) {}
+    </script>
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="wrap">
+        <a class="brand" href={path(lang, '/')}>{site.githubUser}<span>.</span></a>
+        <nav class="nav">
+          {nav.map((n) => (
+            <a href={n.href} aria-current={active === n.key ? 'page' : undefined}>{u[n.key]}</a>
+          ))}
+        </nav>
+        <div class="tools">
+          <a class="chip" href={toOther} hreflang={otherLang}>{u.switchLang}</a>
+          <button class="chip" id="theme" type="button" aria-label="Toggle theme"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 0 0 18z" fill="currentColor"/></svg></button>
+        </div>
+      </div>
+    </header>
+    <main class="wrap"><slot /></main>
+    <footer>
+      <div class="wrap">
+        <span>© {new Date().getFullYear()} {name}</span>
+        <span>{site.links.map((l, i) => (<>{i > 0 && ' · '}<a href={l.url}>{l.label}</a></>))}</span>
+      </div>
+    </footer>
+    <script is:inline>
+      document.getElementById('theme').addEventListener('click', () => {
+        const next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+        document.documentElement.dataset.theme = next;
+        try { localStorage.setItem('theme', next); } catch (e) {}
+      });
+    </script>
+  </body>
+</html>

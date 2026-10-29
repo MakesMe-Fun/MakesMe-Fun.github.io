@@ -1,0 +1,37 @@
+---
+import Base from '../layouts/Base.astro';
+import { site, resume, type Lang } from '../data/site';
+import { t } from '../i18n';
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const u = t(lang);
+---
+<Base lang={lang} title={u.resume} active="resume">
+  <div class="eyebrow">{u.resume}</div>
+  <h1>{site.name[lang]}</h1>
+  <p class="lead">{site.tagline[lang]}</p>
+
+  <h2>{u.education}</h2>
+  <ul class="timeline">
+    {resume.education.map((e) => (
+      <li><span class="when">{e.when}</span><span class="what"><strong>{e.title[lang]}</strong><span>{e.detail[lang]}</span></span></li>
+    ))}
+  </ul>
+
+  <h2>{u.experience}</h2>
+  <ul class="timeline">
+    {resume.experience.map((e) => (
+      <li><span class="when">{e.when}</span><span class="what"><strong>{e.title[lang]}</strong><span>{e.detail[lang]}</span></span></li>
+    ))}
+  </ul>
+
+  <h2>{u.awards}</h2>
+  <ul class="timeline">
+    {resume.awards.map((a) => (
+      <li><span class="when">{a.when}</span><span class="what"><strong>{a.title[lang]}</strong></span></li>
+    ))}
+  </ul>
+
+  <h2>{u.skills}</h2>
+  <div class="tags">{resume.skills.map((s) => <span class="tag">{s}</span>)}</div>
+</Base>

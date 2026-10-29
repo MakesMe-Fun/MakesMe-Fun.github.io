@@ -1,0 +1,32 @@
+---
+import Base from '../layouts/Base.astro';
+import type { Lang } from '../data/site';
+import { t, path, formatDate, readingMinutes } from '../i18n';
+import { slugOf, type Post } from '../lib';
+import { getCollection, render } from 'astro:content';
+interface Props { post: Post; lang: Lang }
+const { post, lang } = Astro.props;
+const u = t(lang);
+const { Content } = await render(post);
+const other: Lang = lang === 'ko' ? 'en' : 'ko';
+const slug = slugOf(post);
+const twin = (await getCollection('blog')).find((p) => p.id === `${other}/${slug}`);
+const altPath = twin ? path(other, `/blog/${slug}/`) : path(other, '/blog/');
+const mins = readingMinutes(post.body);
+---
+<Base lang={lang} title={post.data.title} description={post.data.description} active="blog" altPath={altPath}>
+  <article>
+    <header class="article-head">
+      <div class="eyebrow">{post.data.tags.join(' · ') || u.blog}</div>
+      <h1>{post.data.title}</h1>
+      <p class="lead">{post.data.description}</p>
+      <div class="meta">
+        <time datetime={post.data.date.toISOString()}>{formatDate(post.data.date, lang)}</time>
+        {post.data.updated && <span>{u.updated} {formatDate(post.data.updated, lang)}</span>}
+        <span>{lang === 'ko' ? `${mins}${u.minRead}` : `${mins} ${u.minRead}`}</span>
+      </div>
+    </header>
+    <div class="prose"><Content /></div>
+  </article>
+  <a class="back" href={path(lang, '/blog/')}>{u.back}</a>
+</Base>

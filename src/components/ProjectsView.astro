@@ -1,0 +1,23 @@
+---
+import Base from '../layouts/Base.astro';
+import { projects, type Lang } from '../data/site';
+import { t } from '../i18n';
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const u = t(lang);
+---
+<Base lang={lang} title={u.projects} active="projects">
+  <div class="eyebrow">{u.projects}</div>
+  <h1>{u.projects}</h1>
+  <p class="lead" style="margin-bottom:32px">{u.projectsIntro}</p>
+  <div class="cards">
+    {projects.map((p) => (
+      <article class="card">
+        <h3>{p.title[lang]}</h3>
+        <p>{p.summary[lang]}</p>
+        <div class="tags">{p.tags.map((tg) => <span class="tag">{tg}</span>)}</div>
+        <div class="foot"><span>{p.year}</span>{p.url && <a href={p.url}>{u.view}</a>}</div>
+      </article>
+    ))}
+  </div>
+</Base>
